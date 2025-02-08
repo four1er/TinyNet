@@ -1,7 +1,13 @@
 cc_library(
-    name = "base",
-    srcs = ["base.cpp"],
-    hdrs = ["base.h"],
+    name = "poller",
+    srcs = [
+        "poller.cpp",
+        ],
+    hdrs = [
+        "base.h",
+        "poller.h",
+        ],
+    visibility = ["//visibility:public"],
     copts = [
         "-std=c++20",
         ],
