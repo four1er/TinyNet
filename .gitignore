@@ -6,3 +6,5 @@ bazel-genfiles/
 bazel-out/
 bazel-testlogs/
 bazel-TinyNet/
+
+compile_commands.json
