@@ -8,3 +8,4 @@ bazel-testlogs/
 bazel-TinyNet/
 
 compile_commands.json
+.cache/
