@@ -1,5 +1,5 @@
-#include "epoll.h"
 #include <sys/epoll.h>
+#include "epoll.h"
 
 namespace NNet {
 
@@ -65,6 +65,72 @@ void TEpoll::Poll() {
             }
             if (ev.RHup) {
                 eev.events |= EPOLLRDHUP;
+            }
+        }
+        if (new_ev) {
+            if (epoll_ctl(fd_, EPOLL_CTL_ADD, fd, &eev) < 0) {
+                throw std::runtime_error("epoll_ctl failed");
+            }
+        } else if (!eev.events) {
+            if (epoll_ctl(fd_, EPOLL_CTL_DEL, fd, nullptr) < 0) {
+                if (!(errno == EBADF ||
+                      errno == ENOENT)) {  // closed descriptor after TSocket -> close
+                    throw std::system_error(errno, std::generic_category(), "epoll_ctl");
+                }
+            }
+        } else if (change) {
+            if (epoll_ctl(fd_, EPOLL_CTL_MOD, fd, &eev) < 0) {
+                if (errno == ENOENT) {
+                    if (epoll_ctl(fd_, EPOLL_CTL_ADD, fd, &eev) < 0) {
+                        throw std::system_error(errno, std::generic_category(), "epoll_ctl");
+                    }
+                } else {
+                    throw std::system_error(errno, std::generic_category(), "epoll_ctl");
+                }
+            }
+        }
+    }
+
+    Reset();
+
+    out_events_.resize(std::max<size_t>(1, in_events_.size()));
+
+    int nfds;
+    if ((nfds = epoll_pwait2(fd_, &out_events_[0], out_events_.size(), &ts, nullptr)) < 0) {
+        if (errno == EINTR) {
+            return;
+        }
+        throw std::system_error(errno, std::generic_category(), "epoll_pwait");
+    }
+
+    for (int i = 0; i < nfds; ++i) {
+        int fd = out_events_[i].data.fd;
+        auto ev = in_events_[fd];
+        if (out_events_[i].events & EPOLLIN) {
+            ready_events_.emplace_back(TEvent{fd, TEvent::READ, ev.Read});
+            ev.Read = {};
+        }
+        if (out_events_[i].events & EPOLLOUT) {
+            ready_events_.emplace_back(TEvent{fd, TEvent::WRITE, ev.Write});
+            ev.Write = {};
+        }
+        if (out_events_[i].events & EPOLLHUP) {
+            if (ev.Read) {
+                ready_events_.emplace_back(TEvent{fd, TEvent::READ, ev.Read});
+            }
+            if (ev.Write) {
+                ready_events_.emplace_back(TEvent{fd, TEvent::WRITE, ev.Write});
+            }
+        }
+        if (out_events_[i].events & EPOLLRDHUP) {
+            if (ev.Read) {
+                ready_events_.emplace_back(TEvent{fd, TEvent::READ, ev.Read});
+            }
+            if (ev.Write) {
+                ready_events_.emplace_back(TEvent{fd, TEvent::WRITE, ev.Write});
+            }
+            if (ev.RHup) {
+                ready_events_.emplace_back(TEvent{fd, TEvent::RHUP, ev.RHup});
             }
         }
     }
