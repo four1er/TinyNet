@@ -165,7 +165,7 @@ public:
     last_timers_process_time_ = now;
   }
 
-private:
+protected:
   int max_fd_;                  // max file descriptor in use
   std::vector<TEvent> changes_; // events to be processed (registered events)
   std::vector<TEvent> ready_events_; // events ready to wake up their coroutines
