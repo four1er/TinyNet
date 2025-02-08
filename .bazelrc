@@ -1,3 +1,5 @@
 build --cxxopt=-std=c++20
 build --action_env=CC=/usr/bin/clang-17
 build --action_env=CXX=/usr/bin/clang++-17
+# Enable Bzlmod for every Bazel command
+common --enable_bzlmod
