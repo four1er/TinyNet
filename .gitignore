@@ -1,1 +1,7 @@
 _build/
+
+# Bazel 输出目录
+bazel-bin/
+bazel-genfiles/
+bazel-out/
+bazel-testlogs/
