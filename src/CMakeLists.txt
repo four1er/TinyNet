@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(SOURCE_FILES
     epoll.cpp
     address.cpp
+    socket.cpp
 )
 
 # 创建一个静态库
