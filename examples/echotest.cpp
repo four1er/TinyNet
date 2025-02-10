@@ -1,4 +1,5 @@
 #include "../src/all.h"
+#include "../src/promises.h"
 
 #include <signal.h>
 
