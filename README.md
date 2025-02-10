@@ -1,9 +1,16 @@
 # TinyNet
 a tiny net library bases on C++20 coroutine, learning From Coroio.
 
-# Bazel config
+# Build
+## Cmake
+```shell
+cmake -B _build -DCMAKE_EXPORT_COMPILE_COMMANDS=1
+cmake --build _build --target all
+```
 
-## use Bazelisk
+## Bazel config
+
+### use Bazelisk
 
 On macOS: brew install bazelisk.
 
