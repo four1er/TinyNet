@@ -119,15 +119,18 @@ void TEpoll::Poll() {
     //     throw std::system_error(errno, std::generic_category(), "epoll_pwait");
     // }
 
-    if ((nfds = epoll_pwait(fd_, &out_events_[0], out_events_.size(), ts.tv_nsec, nullptr)) < 0) {
+    if ((nfds = epoll_pwait(fd_, &out_events_[0], out_events_.size(), 100, nullptr)) < 0) {
         if (errno == EINTR) {
             return;
         }
         throw std::system_error(errno, std::generic_category(), "epoll_pwait");
     }
 
+    std::cout << "epoll_pwait done, nfds size: " << nfds << std::endl;
+
     for (int i = 0; i < nfds; ++i) {
         int fd = out_events_[i].data.fd;
+        std::cout << "fd: " << fd << ", events: " << out_events_[i].events << std::endl;
         auto ev = in_events_[fd];
         if (out_events_[i].events & EPOLLIN) {
             ready_events_.emplace_back(TEvent{fd, TEvent::READ, ev.Read});
@@ -157,6 +160,8 @@ void TEpoll::Poll() {
             }
         }
     }
+
+    ProcessTimers();
 }
 
 }  // namespace NNet

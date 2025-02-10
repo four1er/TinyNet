@@ -47,7 +47,10 @@ class TSocketBase : public TSocketBase<void> {
  public:
     auto ReadSome(void* buf, size_t size) {
         struct TAwaitableRead : TAwaitable<TAwaitableRead> {
-            void run() { this->ret = TSockOps::read(this->fd, this->b, this->s); }
+            void run() {
+                this->ret = TSockOps::read(this->fd, this->b, this->s);
+                std::cout << "fd: " << this->fd << ", read ret: " << this->ret << std::endl;
+            }
 
             void await_suspend(std::coroutine_handle<> handle) {
                 this->poller->AddRead(this->fd, handle);
@@ -62,14 +65,20 @@ class TSocketBase : public TSocketBase<void> {
             void await_suspend(std::coroutine_handle<> handle) {
                 this->poller->AddRead(this->fd, handle);
             }
-            void run() { this->ret = TSockOps::read(this->fd, this->b, this->s); }
+            void run() {
+                this->ret = TSockOps::read(this->fd, this->b, this->s);
+                std::cout << "fd: " << this->fd << ", yield read ret: " << this->ret << std::endl;
+            }
         };
         return TAwaitableRead{poller_, fd_, buf, size};
     }
 
     auto WriteSome(const void* buf, size_t size) {
         struct TAwaitableWrite : public TAwaitable<TAwaitableWrite> {
-            void run() { this->ret = TSockOps::write(this->fd, this->b, this->s); }
+            void run() {
+                this->ret = TSockOps::write(this->fd, this->b, this->s);
+                std::cout << "fd: " << this->fd << ", write ret: " << this->ret << std::endl;
+            }
 
             void await_suspend(std::coroutine_handle<> h) { this->poller->AddWrite(this->fd, h); }
         };
@@ -80,7 +89,10 @@ class TSocketBase : public TSocketBase<void> {
         struct TAwaitableWrite : public TAwaitable<TAwaitableWrite> {
             bool await_ready() { return (this->ready = false); }
 
-            void run() { this->ret = TSockOps::write(this->fd, this->b, this->s); }
+            void run() {
+                this->ret = TSockOps::write(this->fd, this->b, this->s);
+                std::cout << "fd: " << this->fd << ", yield write ret: " << this->ret << std::endl;
+            }
 
             void await_suspend(std::coroutine_handle<> h) { this->poller->AddWrite(this->fd, h); }
         };
@@ -213,6 +225,7 @@ class TSocket : public TSocketBase<TSockOps> {
             }
 
             void await_resume() {
+                std::cout << "resume on Connecting, fd: " << fd << std::endl;
                 if (deadline != TTime::max() && poller->RemoveTimer(time_id, deadline)) {
                     throw std::runtime_error("Connect timeout");
                 }
@@ -246,6 +259,7 @@ class TSocket : public TSocketBase<TSockOps> {
                 if (clientfd < 0) {
                     throw std::system_error(errno, std::generic_category(), "Accept failed");
                 }
+                std::cout << "accept done" << std::endl;
                 return TSocket{TAddress{reinterpret_cast<sockaddr*>(clientaddr), addrlen}, clientfd,
                                *poller};
             }

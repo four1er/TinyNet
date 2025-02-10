@@ -38,9 +38,8 @@ TVoidTask server(TLoop* loop) {
     try {
         while (true) {
             auto client = co_await socket.Accept();
-            std::cout << "wait for client" << std::endl;
+            std::cout << "accepted" << std::endl;
             client_handler(std::move(client), loop);
-            std::cout << "client disconnected\n";
         }
     } catch (const std::exception& ex) {
         std::cout << "Exception: " << ex.what() << "\n";
@@ -63,11 +62,14 @@ TVoidTask client(TLoop* loop, int clientId) {
 
         do {
             snprintf(buffer + 6, sizeof(buffer) - 6, "%03d/%03d", messageNo++, clientId);
+            std::cout << "Send to server: " << std::string_view(buffer, 128) << " (" << 128
+                      << ") bytes \n";
             size = co_await socket.WriteSome(buffer, sizeof(buffer));
             size = co_await socket.ReadSome(rcv, sizeof(rcv));
             std::cerr << "Received from server: " << std::string_view(rcv, size) << " (" << size
                       << ") bytes \n";
             co_await loop->Poller().Sleep(std::chrono::milliseconds(1000));
+            std::cout << "sleep 1s done" << std::endl;
         } while (size > 0);
     } catch (const std::exception& ex) {
         std::cout << "Exception: " << ex.what() << "\n";

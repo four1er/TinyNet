@@ -19,6 +19,7 @@ class TPollerBase {
 
     unsigned AddTimer(TTime deadline, THandle handle) {
         timers_.emplace(TTimer{deadline, time_id_, handle});
+        std::cout << "timer id: " << time_id_ << std::endl;
         return time_id_++;
     }
 
@@ -32,7 +33,7 @@ class TPollerBase {
 
     void AddRead(int fd, THandle handle) {
         max_fd_ = std::max(max_fd_, fd);
-        std::cout << "current max fd: " << max_fd_ << std::endl;
+        std::cout << "current max fd: " << max_fd_ << ", input fd: " << fd << std::endl;
         changes_.emplace_back(std::move(TEvent{fd, TEvent::READ, handle}));
         std::cout << "current changes size: " << changes_.size() << std::endl;
     }
@@ -74,6 +75,7 @@ class TPollerBase {
             bool await_ready() { return false; }
 
             void await_suspend(std::coroutine_handle<> handle) {
+                std::cout << "Sleep..." << std::endl;
                 timer_id_ = poller_->AddTimer(n_, handle);
             }
 
@@ -152,6 +154,7 @@ class TPollerBase {
         unsigned prev_id = 0;
         while (!timers_.empty() && timers_.top().Deadline <= now) {
             TTimer timer = timers_.top();
+            std::cout << "timer id: " << timer.Id << std::endl;
             timers_.pop();
             if ((first || prev_id != timer.Id) && timer.Handle) {
                 last_fired_timer_ = timer.Id;
