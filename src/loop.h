@@ -22,6 +22,6 @@ class TLoop {
 
  private:
     TPoller poller_;
-    bool running_ = false;
+    bool running_ = true;
 };
 }  // namespace NNet

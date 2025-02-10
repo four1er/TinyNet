@@ -187,13 +187,16 @@ class TSocket : public TSocketBase<TSockOps> {
     }
 
     auto Connect(const TAddress& addr, TTime deadline = TTime::max()) {
+        std::cout << "Connect to " << addr.ToString() << std::endl;
         if (remote_addr_.has_value()) {
             throw std::runtime_error("Already connected");
         }
         remote_addr_ = addr;
         struct TAwaitable {
             bool await_ready() {
+                std::cout << "try to connect, fd: " << fd << std::endl;
                 int ret = connect(fd, addr.first, addr.second);
+                std::cout << "connect ret: " << ret << " , errno: " << errno << std::endl;
                 if (ret < 0 && !(errno == EINTR || errno == EAGAIN || errno == EINPROGRESS)) {
                     throw std::system_error(errno, std::generic_category(), "Connect failed");
                 }
@@ -201,9 +204,11 @@ class TSocket : public TSocketBase<TSockOps> {
             }
 
             void await_suspend(std::coroutine_handle<> h) {
+                std::cout << "suspend on Connecting, fd: " << fd << std::endl;
                 poller->AddWrite(fd, h);
                 if (deadline != TTime::max()) {
                     time_id = poller->AddTimer(deadline, h);
+                    std::cout << "add timer, fd: " << fd << std::endl;
                 }
             }
 
@@ -226,8 +231,14 @@ class TSocket : public TSocketBase<TSockOps> {
     auto Accept() {
         struct TAwaitable {
             bool await_ready() { return false; }
-            void await_suspend(std::coroutine_handle<> h) { poller->AddRead(fd, h); }
+            void await_suspend(std::coroutine_handle<> h) {
+                std::cout << "suspend on Accepting, "
+                          << "fd: " << fd << std::endl;
+                poller->AddRead(fd, h);
+                std::cout << "suspend done" << std::endl;
+            }
             TSocket await_resume() {
+                std::cout << "resume on Accepting, fd: " << fd << std::endl;
                 char clientaddr[sizeof(sockaddr_in6)];
                 socklen_t addrlen = sizeof(sockaddr_in6);
 

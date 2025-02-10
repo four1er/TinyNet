@@ -20,6 +20,8 @@ TEpoll::~TEpoll() {
 
 void TEpoll::Poll() {
     auto ts = GetTimeout();
+    std::cout << "poll timeout: " << ts.tv_sec << "s" << ts.tv_nsec / 1e6 << "ms" << std::endl;
+    std::cout << "max_fd_: " << max_fd_ << std::endl;
     if (static_cast<int>(in_events_.size()) <= max_fd_) {
         in_events_.resize(max_fd_ + 1);
     }

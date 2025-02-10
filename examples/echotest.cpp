@@ -33,11 +33,14 @@ TVoidTask server(TLoop* loop) {
     TSocket socket(loop->Poller(), addr.Domain());
     socket.Bind(addr);
     socket.Listen();
+    std::cout << "Server started Listen\n";
 
     try {
         while (true) {
             auto client = co_await socket.Accept();
+            std::cout << "wait for client" << std::endl;
             client_handler(std::move(client), loop);
+            std::cout << "client disconnected\n";
         }
     } catch (const std::exception& ex) {
         std::cout << "Exception: " << ex.what() << "\n";
@@ -50,6 +53,8 @@ TVoidTask client(TLoop* loop, int clientId) {
     char rcv[128] = {0};
     int messageNo = 1;
     ssize_t size = 0;
+
+    std::cout << "create client, id: " << clientId << std::endl;
 
     try {
         TAddress addr{"127.0.0.1", 8888};
@@ -84,7 +89,7 @@ int main(int argc, char** argv) {
     for (int i = 0; i < clients; i++) {
         client(&loop, i + 1);
     }
-
+    std::cout << "Start loop..." << std::endl;
     loop.Loop();
     return 0;
 }

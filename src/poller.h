@@ -32,7 +32,9 @@ class TPollerBase {
 
     void AddRead(int fd, THandle handle) {
         max_fd_ = std::max(max_fd_, fd);
+        std::cout << "current max fd: " << max_fd_ << std::endl;
         changes_.emplace_back(std::move(TEvent{fd, TEvent::READ, handle}));
+        std::cout << "current changes size: " << changes_.size() << std::endl;
     }
 
     void AddWrite(int fd, THandle handle) {
