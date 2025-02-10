@@ -14,8 +14,8 @@ class TLoop {
     void Stop() { running_ = false; }
 
     void Step() {
-        poller_.Poller();
-        poller_.WakeipReadyHnadles();
+        poller_.Poll();
+        poller_.WakeupReadyHandles();
     }
 
     TPoller& Poller() { return poller_; }

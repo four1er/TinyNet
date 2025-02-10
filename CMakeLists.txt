@@ -9,4 +9,4 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_subdirectory(src)
 
 # 添加 examples 子目录
-# add_subdirectory(examples)
+add_subdirectory(examples)

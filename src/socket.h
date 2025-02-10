@@ -136,7 +136,7 @@ class TSocketBase : public TSocketBase<void> {
 
         TPollerBase* poller = nullptr;
         int fd = -1;
-        void* buf = nullptr;
+        void* b = nullptr;
         size_t s = 0;
         int ret = -1;
         bool ready = false;

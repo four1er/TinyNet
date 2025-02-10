@@ -1,5 +1,5 @@
 # TinyNet
-a tiny net library bases on C++20 coroutine
+a tiny net library bases on C++20 coroutine, learning From Coroio.
 
 # Bazel config
 
