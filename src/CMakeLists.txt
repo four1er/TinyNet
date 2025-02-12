@@ -6,6 +6,7 @@ set(SOURCE_FILES
     epoll.cpp
     address.cpp
     socket.cpp
+    sockutils.cpp
 )
 
 # 创建一个静态库
