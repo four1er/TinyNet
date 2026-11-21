@@ -1,4 +1,5 @@
 _build/
+build/
 
 # Bazel 输出目录
 bazel-bin/
